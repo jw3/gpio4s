@@ -54,7 +54,7 @@ class GpioService(m: GpioInfo, pp: PinProducer) extends Actor {
 object GpioService {
     def apply(m: GpioInfo, f: PinProducer)(implicit sys: ActorSystem): ActorRef = sys.actorOf(Props(new GpioService(m, f)))
 
-    def produceGpios(model: GpioInfo, pp: PinProducer)(implicit ctx: ActorContext): PinAllocation = model.pins.map { p => p -> pp.get(p) }.toMap
+    def produceGpios(model: GpioInfo, pp: PinProducer)(implicit ctx: ActorContext): PinAllocation = model.pins.map(p => p -> pp.get(p)).toMap
     def configure(gpios: PinAllocation, conf: Config, reset: Boolean = false) = conf.pins().foreach(p => gpios(p.num) ! Setup(p))
 
     private type SubscriberList = mutable.HashMap[Int, mutable.Set[PinRef]] with mutable.MultiMap[Int, PinRef]
