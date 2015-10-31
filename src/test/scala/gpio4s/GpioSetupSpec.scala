@@ -2,7 +2,7 @@ package gpio4s
 
 import akka.actor.{ActorContext, ActorRef, ActorSystem}
 import akka.testkit.{ImplicitSender, TestKit, TestProbe}
-import gpio4s.ControllerInfo.PiBrev2
+import gpio4s.GpioInfo.PiBrev2
 import gpio4s.gpiocfg.CfgDSL._
 import gpio4s.gpiocfg.CfgIO.RichPins
 import org.scalamock.scalatest.MockFactory
@@ -16,13 +16,13 @@ class GpioSetupSpec extends TestKit(ActorSystem(getClass.getSimpleName.dropRight
         "create all pins for model" in {
             val producer = stub[PinProducer]
             (producer.get(_: Int)(_: ActorContext)).when(*, *).returning(testActor).repeat(PiBrev2.pins.indices)
-            Controller(PiBrev2, producer)
+            GpioService(PiBrev2, producer)
             Thread.sleep(1000)
         }
 
         "configure pins" in {
             val probe = TestProbe()
-            val pi = Controller(PiBrev2, probedProducer(probe))
+            val pi = GpioService(PiBrev2, probedProducer(probe))
 
             val conf = gpio {_ number 0 digital input}
             pi ! Configure(conf)
@@ -31,7 +31,7 @@ class GpioSetupSpec extends TestKit(ActorSystem(getClass.getSimpleName.dropRight
         }
 
         "relay events" in {
-            val pi = Controller(PiBrev2, producer)
+            val pi = GpioService(PiBrev2, producer)
 
             val subs = TestProbe()
             subs.send(pi, Subscribe(0))

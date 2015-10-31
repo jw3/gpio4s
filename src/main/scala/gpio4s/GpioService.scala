@@ -9,10 +9,10 @@ import scala.collection.mutable
 
 
 /**
- * Interface to a GPIO Controller
+ * Service as an interface to GPIO
  */
-class Controller(m: ControllerInfo, pp: PinProducer) extends Actor {
-    import Controller._
+class GpioService(m: GpioInfo, pp: PinProducer) extends Actor {
+    import GpioService._
 
     val gpios: PinAllocation = produceGpios(m, pp)
     val subscribers: SubscriberList = subscriberList()
@@ -51,10 +51,10 @@ class Controller(m: ControllerInfo, pp: PinProducer) extends Actor {
     }
 }
 
-object Controller {
-    def apply(m: ControllerInfo, f: PinProducer)(implicit sys: ActorSystem): ActorRef = sys.actorOf(Props(new Controller(m, f)))
+object GpioService {
+    def apply(m: GpioInfo, f: PinProducer)(implicit sys: ActorSystem): ActorRef = sys.actorOf(Props(new GpioService(m, f)))
 
-    def produceGpios(model: ControllerInfo, pp: PinProducer)(implicit ctx: ActorContext): PinAllocation = model.pins.map { p => p -> pp.get(p) }.toMap
+    def produceGpios(model: GpioInfo, pp: PinProducer)(implicit ctx: ActorContext): PinAllocation = model.pins.map { p => p -> pp.get(p) }.toMap
     def configure(gpios: PinAllocation, conf: Config, reset: Boolean = false) = conf.pins().foreach(p => gpios(p.num) ! Setup(p))
 
     private type SubscriberList = mutable.HashMap[Int, mutable.Set[PinRef]] with mutable.MultiMap[Int, PinRef]
